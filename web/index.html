@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nutrient audit evidence extraction</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.cloud.pspdfkit.com/pspdfkit-web@1.22.0/nutrient-viewer.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">Nutrient</span></div>
+  <h1>Audit evidence extraction: classify, extract, annotate</h1>
+  <div class="topbar-actions">
+    <button id="theme-toggle" type="button" class="ghost">Dark</button>
+  </div>
+</header>
+
+<p id="banner" class="banner" hidden></p>
+
+<main class="layout">
+  <aside class="panel left">
+    <section>
+      <h2>1. Document</h2>
+      <p class="hint">Word, Excel, PowerPoint, PDF or scans. Office files are converted to PDF by the Nutrient SDK before processing.</p>
+      <div class="sample-group"><h3>SOC / ISAE reports (DOCX)</h3><ul id="samples-soc-reports" class="samples"></ul></div>
+      <div class="sample-group"><h3>Supplier invoices (PDF)</h3><ul id="samples-invoices" class="samples"></ul></div>
+      <label class="upload">Or upload your own
+        <input id="upload" type="file" accept=".pdf,.docx,.doc,.xlsx,.pptx,.png,.jpg,.jpeg,.tif,.tiff">
+      </label>
+      <p id="selected" class="selected">No document selected</p>
+    </section>
+
+    <section>
+      <h2>2. Extraction template</h2>
+      <label>Template
+        <select id="template">
+          <option value="auto">Auto-detect (classification)</option>
+        </select>
+      </label>
+      <label>LLM for extraction
+        <select id="model"></select>
+      </label>
+      <label>Parsing engine
+        <select id="engine">
+          <option value="auto">Auto: text layer for Office files, ICR for PDFs and scans</option>
+          <option value="adaptive">Text layer, OCR only when needed (fast)</option>
+          <option value="icr">ICR vision model on every page (scans, complex layouts)</option>
+          <option value="vlm">ICR + VLM page review (hardest layouts, more tokens)</option>
+        </select>
+      </label>
+      <button id="edit-templates" type="button" class="ghost small">Edit templates (JSON)</button>
+      <div id="template-editor" hidden>
+        <p class="hint">Each attribute is a name, a type and a semantic description in plain English. Edit, add or remove attributes, then process again. Changes apply to this session only.</p>
+        <textarea id="templates-json" spellcheck="false"></textarea>
+        <button id="reset-templates" type="button" class="ghost small">Reset to defaults</button>
+      </div>
+    </section>
+
+    <section>
+      <button id="process" type="button" class="primary" disabled>Process document</button>
+      <ol id="progress" class="progress" hidden>
+        <li data-step="convert">Convert to PDF</li>
+        <li data-step="parse">Parse (Nutrient ICR)</li>
+        <li data-step="classify">Classify</li>
+        <li data-step="extract">Extract attributes (LLM)</li>
+        <li data-step="annotate">Annotate in viewer</li>
+      </ol>
+    </section>
+  </aside>
+
+  <section class="viewer-wrap">
+    <div id="viewer"></div>
+    <p id="viewer-note" class="viewer-note">Select a document to preview it</p>
+  </section>
+
+  <aside class="panel right">
+    <nav class="tabs">
+      <button type="button" data-view="attributes" class="active">Attributes</button>
+      <button type="button" data-view="json">JSON response</button>
+    </nav>
+    <div id="view-attributes">
+      <div id="classification" class="card" hidden></div>
+      <div id="attributes" class="card"><p class="hint">Processed attributes appear here. Click a row to jump to the evidence in the document.</p></div>
+      <div id="usage" class="card" hidden></div>
+      <button id="download" type="button" class="ghost small" hidden>Download annotated PDF</button>
+    </div>
+    <div id="view-json" hidden>
+      <p class="hint">This is the exact payload your audit platform would ingest. Coordinates are pixels in the page size listed under <code>document.pages</code>.</p>
+      <div class="json-actions"><button id="copy-json" type="button" class="ghost small">Copy</button></div>
+      <pre id="json"></pre>
+    </div>
+  </aside>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
